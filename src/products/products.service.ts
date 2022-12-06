@@ -6,11 +6,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DatabaseError } from 'pg';
+import { validate as isUUID } from 'uuid';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
+
 @Injectable()
 export class ProductsService {
   constructor(
@@ -43,12 +45,18 @@ export class ProductsService {
     return `This action returns all products`;
   }
 
-  async findOne(id: string) {
+  async findOne(term: string) {
+    let product: Product;
+
     try {
-      const product = await this.productRepository.findOneBy({ id });
+      if (isUUID(term)) {
+        product = await this.productRepository.findOneBy({ id: term });
+      } else {
+        product = await this.productRepository.findOneBy({ slug: term });
+      }
 
       if (!product) {
-        throw new NotFoundException(`Product with id ${id} doesn't exists`);
+        throw new NotFoundException(`Product with id ${term} doesn't exists`);
       }
 
       return product;
