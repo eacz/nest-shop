@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DatabaseError } from 'pg';
 import { QueryFailedError, Repository } from 'typeorm';
@@ -23,28 +28,57 @@ export class ProductsService {
     }
   }
 
-  findAll() {
+  async findAll() {
+    try {
+      const products = await this.productRepository.find({});
+      return products;
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
     return `This action returns all products`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    try {
+      const product = await this.productRepository.findOneBy({ id });
+
+      if (!product) {
+        throw new NotFoundException(`Product with id ${id} doesn't exists`);
+      }
+
+      return product;
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
     return `This action updates a #${id} product`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    try {
+      const product = await this.productRepository.delete(id);
+      if (product.affected === 0) {
+        throw new NotFoundException(`Product with id ${id} doesn't exists`);
+      }
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
   }
 
   private handleDBExceptions(error: any) {
     this.logger.error(error);
+
     if (error instanceof QueryFailedError) {
       const errorData = error.driverError as DatabaseError;
+      //duplicated error
       if (errorData.code === '23505') {
         throw new BadRequestException(errorData.detail);
+      }
+      //id error
+      if (errorData.code === '22P02') {
+        throw new BadRequestException(`Invalid uuid`);
       }
     }
     throw error;
