@@ -1,11 +1,15 @@
 import {
   BadRequestException,
   Controller,
+  Get,
+  Param,
   Post,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { diskStorage } from 'multer';
 import { fileFilter, fileNamer } from 'src/common/helpers';
 import { FilesService } from './files.service';
@@ -31,6 +35,18 @@ export class FilesController {
       );
     }
 
-    return file.originalname;
+    const secureUrl = `${file.filename}`;
+
+    return secureUrl;
+  }
+
+  @Get('product/:imageName')
+  findProductImage(
+    @Res() res: Response,
+    @Param('imageName') imageName: string,
+  ) {
+    const path = this.filesService.findProductImage(imageName);
+
+    res.sendFile(path);
   }
 }
