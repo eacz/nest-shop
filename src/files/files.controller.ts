@@ -8,6 +8,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
@@ -16,7 +17,10 @@ import { FilesService } from './files.service';
 
 @Controller('files')
 export class FilesController {
-  constructor(private readonly filesService: FilesService) {}
+  constructor(
+    private readonly filesService: FilesService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('product')
   @UseInterceptors(
@@ -35,7 +39,9 @@ export class FilesController {
       );
     }
 
-    const secureUrl = `${file.filename}`;
+    const secureUrl = ` ${this.configService.get('HOST_API')}/files/product/${
+      file.filename
+    }`;
 
     return secureUrl;
   }
