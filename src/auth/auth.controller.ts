@@ -23,7 +23,12 @@ export class AuthController {
 
   @Get()
   @UseGuards(AuthGuard())
-  testPrivateRoute(@GetUser() user: User) {
+  testPrivateRoute(
+    @GetUser() user: User,
+    //@GetUser('email') userEmail: string,
+    //@GetUser(['email', 'fullName']) userProperties: string[],
+    //@GetUser(['email', 'fullName', 'pedro']) userProperties2: string[],
+  ) {
     return { user };
   }
 }
