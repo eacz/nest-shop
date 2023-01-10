@@ -3,8 +3,16 @@ import {
   ExecutionContext,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { User } from '../entities/auth.entity';
 
-export const GetUser = createParamDecorator((data, ctx: ExecutionContext) => {
+type validUserProps = keyof Omit<
+  User,
+  'checkFieldsBeforeInsert' | 'checkFieldsBeforeUpdate'
+>;
+
+export const GetUser = createParamDecorator<
+  validUserProps | Array<validUserProps>
+>((data, ctx: ExecutionContext) => {
   const req = ctx.switchToHttp().getRequest();
   const user = req.user;
   if (!user) {
