@@ -85,4 +85,9 @@ export class AuthService {
     }
     throw error;
   }
+
+  async checkAuthStatus(user: User) {
+    const token = this.generateJwt({ id: user.id });
+    return { user, token };
+  }
 }
