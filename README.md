@@ -25,7 +25,7 @@ docker compose up -d
 yarn start:dev
 ```
 
-7. Execute SEED to have example data to test
+7. Execute SEED to have example data to test (you will have to create an user manually because the route its protected to admin roles, or comment the @Auth() line)
 
 ```
 {{url}}/api/seed
