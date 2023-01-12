@@ -44,16 +44,38 @@ export class ProductsController {
     return this.productsService.create(createProductDto, user);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Products retrieved successfully',
+    type: Product,
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden. (Token Related)' })
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {
     return this.productsService.findAll(paginationDto);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Products retrieved successfully',
+    type: Product,
+  })
   @Get(':term')
   findOne(@Param('term') term: string) {
     return this.productsService.findOne(term);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Product was updated successfully',
+    type: Product,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request (Missing data or duplicated properties)',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden. (Token Related)' })
+  @ApiResponse({ status: 404, description: 'Not Found (Invalid id)' })
   @Patch(':id')
   @Auth(validRoles.superUser)
   update(
@@ -64,6 +86,16 @@ export class ProductsController {
     return this.productsService.update(id, updateProductDto, user);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Product was delted successfully',
+    type: null,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. (Token or User Role Related)',
+  })
+  @ApiResponse({ status: 404, description: 'Not Found (Invalid id)' })
   @Delete(':id')
   @Auth(validRoles.superUser)
   remove(@Param('id', ParseUUIDPipe) id: string) {
