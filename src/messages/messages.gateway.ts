@@ -7,9 +7,9 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+
 import { JwtPayload } from 'src/auth/interfaces';
 import { NewMessageDto } from './dtos/new-message.dto';
-
 import { MessagesService } from './messages.service';
 
 @WebSocketGateway({ cors: true })
@@ -22,13 +22,12 @@ export class MessagesGateway
   ) {}
   @WebSocketServer() wss: Server;
 
-  handleConnection(client: Socket) {
-    this.messagesService.registerClient(client);
+  async handleConnection(client: Socket) {
     const token = client.handshake.headers.authentication as string;
     let payload: JwtPayload;
     try {
       payload = this.jwtService.verify(token);
-      console.log({ payload });
+      await this.messagesService.registerClient(client, payload.id);
     } catch (error) {
       client.disconnect();
       return;
@@ -63,7 +62,7 @@ export class MessagesGateway
 
     //emit to everyone (including client)
     this.wss.emit('message-from-server', {
-      fullName: 'Pedro',
+      fullName: this.messagesService.getUserFullNameBySocketId(client.id),
       message: payload.message,
     });
   }
